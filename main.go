@@ -10,11 +10,10 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const NANCE_API = "https://api.nance.app/"
-
 var (
-	s *discordgo.Session
-	t *tokenizers.Tokenizer
+	s    *discordgo.Session
+	t    *tokenizers.Tokenizer
+	port string
 )
 
 func init() {
@@ -23,9 +22,15 @@ func init() {
 		log.Fatalf("Error loading .env file: %v\n", err)
 	}
 
-	if os.Getenv("DISCORD_TOKEN") == "" {
-		log.Fatal("No DISCORD_TOKEN found in .env")
+	for _, v := range []string{"DISCORD_TOKEN", "OPENAI_API_KEY", "OPENAI_API_URL", "PORT"} {
+		if os.Getenv(v) == "" {
+			log.Fatalf("No %s found in env\n", v)
+		}
 	}
+
+	apiUrl = os.Getenv("OPENAI_API_URL")
+	apiKey = os.Getenv("OPENAI_API_KEY")
+	port = os.Getenv("PORT")
 
 	s, err = discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
@@ -39,5 +44,12 @@ func init() {
 }
 
 func main() {
-	http.ListenAndServe(":8080", nil)
+	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
+	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
+
+	http.ListenAndServe(":"+port, nil)
 }
+
+func summarizeProposal(w http.ResponseWriter, req *http.Request) {}
+
+func summarizeThread(w http.ResponseWriter, req *http.Request) {}
