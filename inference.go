@@ -23,7 +23,7 @@ const (
 type InferenceRequest struct {
 	systemPrompt string
 	userPrompt   string
-	maxTokens    int
+	// maxTokens    int
 }
 
 type InferenceResult struct {
@@ -68,7 +68,7 @@ func inference(r InferenceRequest, out chan<- InferenceResult) {
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	requestBody := map[string]interface{}{
-		"max_tokens":  r.maxTokens,
+		// "max_tokens":  r.maxTokens,
 		"model":       MODEL_NAME,
 		"temperature": TEMPERATURE,
 		"messages": []map[string]string{

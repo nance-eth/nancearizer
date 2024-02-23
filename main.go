@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"os"
@@ -22,7 +23,7 @@ func init() {
 		log.Fatalf("Error loading .env file: %v\n", err)
 	}
 
-	for _, v := range []string{"DISCORD_TOKEN", "OPENAI_API_KEY", "OPENAI_API_URL", "PORT"} {
+	for _, v := range []string{"DISCORD_TOKEN", "OPENAI_API_KEY", "OPENAI_API_URL"} {
 		if os.Getenv(v) == "" {
 			log.Fatalf("No %s found in env\n", v)
 		}
@@ -30,7 +31,11 @@ func init() {
 
 	apiUrl = os.Getenv("OPENAI_API_URL")
 	apiKey = os.Getenv("OPENAI_API_KEY")
+
 	port = os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	s, err = discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
 	if err != nil {
@@ -45,11 +50,45 @@ func init() {
 
 func main() {
 	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
-	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
+	// http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
 
 	http.ListenAndServe(":"+port, nil)
 }
 
-func summarizeProposal(w http.ResponseWriter, req *http.Request) {}
+func summarizeProposal(w http.ResponseWriter, req *http.Request) {
+	space := req.PathValue("space")
+	id := req.PathValue("id")
 
-func summarizeThread(w http.ResponseWriter, req *http.Request) {}
+	if space == "" || id == "" {
+		http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
+		return
+	}
+
+	p, err := proposal(space, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var b bytes.Buffer
+
+	proposalUserTmpl.Execute(&b, p.Data)
+	userPrompt := b.String()
+
+	out := make(chan InferenceResult)
+
+	go inference(InferenceRequest{
+		proposalSystemPrompt,
+		userPrompt,
+	}, out)
+
+	inferenceRes := <-out
+	if inferenceRes.err != nil {
+		http.Error(w, inferenceRes.err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(inferenceRes.result))
+}
+
+// func summarizeThread(w http.ResponseWriter, req *http.Request) {}
