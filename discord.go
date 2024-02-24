@@ -43,6 +43,11 @@ func threadPrompts(threadUrl string) ([]string, error) {
 			msgsToUse = append(msgsToUse, msgStr)
 		}
 
+		// If this is the first iteration and there are no messages, return an error
+		if beforeId == "" && len(msgsToUse) == 0 {
+			return nil, errors.New("no messages found")
+		}
+
 		// Update the beforeId for the next iteration
 		beforeId = msgs[len(msgs)-1].ID
 		if len(msgs) < 100 {
