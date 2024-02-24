@@ -56,6 +56,7 @@ func main() {
 	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
 	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
 
+	log.Println("Listening on port", port)
 	http.ListenAndServe(":"+port, nil)
 }
 
