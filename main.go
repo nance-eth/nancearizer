@@ -18,9 +18,11 @@ var (
 )
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %v\n", err)
+	_, err := os.Stat(".env")
+	if !os.IsNotExist(err) {
+		if err := godotenv.Load(); err != nil {
+			log.Fatalf("Error loading .env file: %v\n", err)
+		}
 	}
 
 	for _, v := range []string{"DISCORD_TOKEN", "OPENAI_API_KEY", "OPENAI_API_URL"} {
