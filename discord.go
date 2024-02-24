@@ -20,6 +20,7 @@ func threadPrompts(threadUrl string) ([]string, error) {
 	}
 	threadId := threadUrl[i+1:]
 
+	r := strings.NewReplacer("\n", " ", "\r", " ", "\t", " ", "\\", "")
 	msgsToUse := make([]string, 0)
 	var beforeId string
 
@@ -35,7 +36,8 @@ func threadPrompts(threadUrl string) ([]string, error) {
 				continue
 			}
 
-			msgStr := fmt.Sprintf("%s: %s", m.Author.Username, m.ContentWithMentionsReplaced())
+			content := r.Replace(m.ContentWithMentionsReplaced())
+			msgStr := fmt.Sprintf("%s: %s", m.Author.Username, content)
 			msgsToUse = append(msgsToUse, msgStr)
 		}
 

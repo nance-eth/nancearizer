@@ -117,7 +117,7 @@ func summarizeThread(w http.ResponseWriter, req *http.Request) {
 
 	out := make(chan InferenceResult)
 	go inference(InferenceRequest{
-		"", // TODO
+		threadSystemPrompt,
 		userPrompts[0],
 	}, out)
 

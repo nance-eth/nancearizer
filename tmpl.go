@@ -8,6 +8,7 @@ import (
 var (
 	proposalSystemPrompt string
 	proposalUserTmpl     *template.Template // User prompt template for summarizing a proposal.
+	threadSystemPrompt   string
 )
 
 func init() {
@@ -23,4 +24,6 @@ func init() {
 	if proposalUserTmpl, err = template.New("proposalUser").Parse(proposalUserStr); err != nil {
 		log.Fatalf("Error parsing proposal template: %v\n", err)
 	}
+
+	threadSystemPrompt = `Briefly summarize the provided discussion thread messages in a single paragraph with markdown formatting. ` + generalTips
 }
