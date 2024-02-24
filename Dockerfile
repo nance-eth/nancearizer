@@ -11,7 +11,7 @@ RUN go mod download
 
 # Install the tokenizers library
 ARG VERSION=v0.7.0
-RUN curl -fsSL https://github.com/daulet/tokenizers/releases/download/${VERSION}/libtokenizers.linux-arm64.tar.gz | tar xvz
+RUN curl -fsSL https://github.com/daulet/tokenizers/releases/download/${VERSION}/libtokenizers.linux-amd64.tar.gz | tar xvz
 RUN mkdir -p /go/pkg/mod/github.com/daulet/tokenizers@${VERSION}/
 RUN mv ./libtokenizers.a /go/pkg/mod/github.com/daulet/tokenizers@${VERSION}/libtokenizers.a
 
