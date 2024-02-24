@@ -13,7 +13,7 @@ import (
 
 var (
 	s    *discordgo.Session
-	t    *tokenizers.Tokenizer
+	tk   *tokenizers.Tokenizer
 	port string
 )
 
@@ -42,15 +42,18 @@ func init() {
 		log.Fatalf("Error creating Discord session: %v\n", err)
 	}
 
-	t, err = tokenizers.FromFile("tokenizer.json")
+	tk, err = tokenizers.FromFile("tokenizer.json")
 	if err != nil {
 		log.Fatalf("Error loading tokenizer: %v\n", err)
 	}
 }
 
 func main() {
+	defer tk.Close()
+	defer s.Close()
+
 	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
-	// http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
+	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
 
 	http.ListenAndServe(":"+port, nil)
 }
@@ -91,4 +94,38 @@ func summarizeProposal(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(inferenceRes.result))
 }
 
-// func summarizeThread(w http.ResponseWriter, req *http.Request) {}
+func summarizeThread(w http.ResponseWriter, req *http.Request) {
+	space := req.PathValue("space")
+	id := req.PathValue("id")
+
+	if space == "" || id == "" {
+		http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
+		return
+	}
+
+	p, err := proposal(space, id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	userPrompts, err := threadPrompts(p.Data.DiscussionThreadURL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	out := make(chan InferenceResult)
+	go inference(InferenceRequest{
+		"", // TODO
+		userPrompts[0],
+	}, out)
+
+	inferenceRes := <-out
+	if inferenceRes.err != nil {
+		http.Error(w, inferenceRes.err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte(inferenceRes.result))
+}
