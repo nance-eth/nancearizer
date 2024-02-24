@@ -50,7 +50,6 @@ func init() {
 
 func main() {
 	defer tk.Close()
-	defer s.Close()
 
 	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
 	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)

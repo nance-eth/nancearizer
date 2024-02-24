@@ -13,6 +13,8 @@ func threadPrompts(threadUrl string) ([]string, error) {
 		return nil, err
 	}
 
+	defer s.Close()
+
 	// Get the thread ID from the URL
 	i := strings.LastIndex(threadUrl, "/")
 	if len(threadUrl) < i+1 {
