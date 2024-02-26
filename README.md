@@ -22,3 +22,6 @@ Nancearizer exposes two endpoints:
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `GET /proposal/{space}/{id}` | Summarize the proposal in the specified space with the specified ID.                                                |
 | `GET /thread/{space}/{id}`   | Summarize the Discord discussion thread corresponding to the proposal in the specified space with the specified ID. |
+
+## Docker Build
+```docker build --platform=linux/amd64 -f Dockerfile .```

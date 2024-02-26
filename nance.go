@@ -36,7 +36,11 @@ func proposal(space, proposalId string) (*ProposalResponse, error) {
 
 	defer resp.Body.Close()
 
-	bytes, err := io.ReadAll(resp.Body)
+	return processProposal(resp.Body)
+}
+
+func processProposal(r io.Reader) (*ProposalResponse, error) {
+	bytes, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

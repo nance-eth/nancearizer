@@ -54,6 +54,7 @@ func main() {
 	defer tk.Close()
 
 	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
+	http.HandleFunc("POST /proposal", summarizeProposal)
 	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
 
 	log.Println("Listening on port", port)
@@ -64,12 +65,19 @@ func summarizeProposal(w http.ResponseWriter, req *http.Request) {
 	space := req.PathValue("space")
 	id := req.PathValue("id")
 
-	if space == "" || id == "" {
-		http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
-		return
+	var p *ProposalResponse
+	var err error
+
+	if req.Method == "POST" {
+		p, err = processProposal(req.Body)
+	} else if req.Method == "GET" {
+		if space == "" || id == "" {
+			http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
+			return
+		}
+		p, err = proposal(space, id)
 	}
 
-	p, err := proposal(space, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
