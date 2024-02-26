@@ -56,30 +56,16 @@ func main() {
 	http.HandleFunc("GET /proposal/{space}/{id}", summarizeProposal)
 	http.HandleFunc("POST /proposal", summarizeProposal)
 	http.HandleFunc("GET /thread/{space}/{id}", summarizeThread)
+	http.HandleFunc("POST /thread", summarizeThread)
 
 	log.Println("Listening on port", port)
 	http.ListenAndServe(":"+port, nil)
 }
 
 func summarizeProposal(w http.ResponseWriter, req *http.Request) {
-	space := req.PathValue("space")
-	id := req.PathValue("id")
-
-	var p *ProposalResponse
-	var err error
-
-	if req.Method == "POST" {
-		p, err = processProposal(req.Body)
-	} else if req.Method == "GET" {
-		if space == "" || id == "" {
-			http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
-			return
-		}
-		p, err = proposal(space, id)
-	}
+	p, err := fetchProposal(w, req)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -105,17 +91,9 @@ func summarizeProposal(w http.ResponseWriter, req *http.Request) {
 }
 
 func summarizeThread(w http.ResponseWriter, req *http.Request) {
-	space := req.PathValue("space")
-	id := req.PathValue("id")
+	p, err := fetchProposal(w, req)
 
-	if space == "" || id == "" {
-		http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
-		return
-	}
-
-	p, err := proposal(space, id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -138,4 +116,29 @@ func summarizeThread(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Write([]byte(inferenceRes.result))
+}
+
+func fetchProposal(w http.ResponseWriter, req *http.Request) (*ProposalResponse, error) {
+	space := req.PathValue("space")
+	id := req.PathValue("id")
+
+	var p *ProposalResponse
+	var err error
+
+	if req.Method == "POST" {
+		p, err = processProposal(req.Body)
+	} else if req.Method == "GET" {
+		if space == "" || id == "" {
+			http.Error(w, "Invalid path (missing space or id)", http.StatusBadRequest)
+			return nil, err
+		}
+		p, err = proposal(space, id)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return nil, err
+	}
+
+	return p, nil
 }

@@ -18,10 +18,12 @@ go run . # run
 
 Nancearizer exposes two endpoints:
 
-| Endpoints                    | Description                                                                                                         |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `GET /proposal/{space}/{id}` | Summarize the proposal in the specified space with the specified ID.                                                |
+| Endpoints                    | Description                                                  |
+| ---------------------------- | ------------------------------------------------------------ |
+| `GET /proposal/{space}/{id}` | Summarize the proposal in the specified space with the specified ID. |
+| `POST /proposal`             | Summarize the proposal from `BODY` data<br />Uses Nance [`ProposalQueryResponse` format](https://github.com/nance-eth/nance-ts/blob/main/src/api/models.ts#L43) |
 | `GET /thread/{space}/{id}`   | Summarize the Discord discussion thread corresponding to the proposal in the specified space with the specified ID. |
+| `POST /thread`               | Summarize the specified Discord thread from `BODY` data<br />Uses Nance [`ProposalQueryResponse` format](https://github.com/nance-eth/nance-ts/blob/main/src/api/models.ts#L43) |
 
 ## Docker Build
 ```docker build --platform=linux/amd64 -f Dockerfile .```
