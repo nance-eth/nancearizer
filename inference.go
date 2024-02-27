@@ -133,5 +133,12 @@ func inference(r InferenceRequest, out chan<- InferenceResult) {
 		log.Println("Inference request finished with reason " + response.Choices[0].FinishReason + ".")
 	}
 
+	log.Printf(
+		"Inference request finished with reason '%s'. Input tokens: %d, output tokens: %d\n",
+		response.Choices[0].FinishReason,
+		response.Usage.PromptTokens,
+		response.Usage.CompletionTokens,
+	)
+
 	out <- InferenceResult{result: response.Choices[0].Message.Content}
 }

@@ -18,7 +18,7 @@ func init() {
 
 	// syntaxTip := `Mention user IDs with the "<@ID>" syntax. For example, the user ID 145386154785505280 would be formatted as <@145386154785505280>. Mention channels using the "<#ID>" syntax. For example, the channel ID 775859454780244031 would be formatted as <#775859454780244031>.`
 
-	proposalSystemPrompt = `Briefly summarize the provided governance proposal in a single paragraph with markdown formatting. ` + generalTips
+	proposalSystemPrompt = `Briefly summarize the provided governance proposal in 2-3 sentences. ` + generalTips
 
 	proposalUserStr := "Here is the proposal to summarize.\n\n{{ .Body }}"
 	if proposalUserTmpl, err = template.New("proposalUser").Parse(proposalUserStr); err != nil {
